@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::env;
-use std::fs::{self, File, OpenOptions};
-use std::io::{BufRead, BufReader, BufWriter, Write};
+use std::fs::{File, OpenOptions};
+use std::io::{BufRead, BufReader, Write};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ConnInfo {
