@@ -55,7 +55,7 @@
 
 
 <script setup lang="ts">
-import { reactive, ref , onMounted} from 'vue'
+import { reactive, ref, onMounted, onBeforeMount } from 'vue'
 import { invoke } from "@tauri-apps/api/tauri";
 const addConnDialog = ref(false)
 let connInfo = reactive({
@@ -69,7 +69,7 @@ let connInfo = reactive({
 const lists: String[] = reactive([])
 
 const openAddConnDialog = () => {
- connInfo =  reactive({
+  connInfo = reactive({
     host: '',
     port: 22,
     username: '',
@@ -86,15 +86,16 @@ async function addConnection() {
   }
   addConnDialog.value = false
 }
-async function read_config(){
-    let res:[] = await invoke('read_config')
-    res.forEach((data:any)=>{
-      lists.push(data.host)
-    })
-  }
+async function read_config() {
+  let res: [] = await invoke('read_config')
+  res.forEach((data: any) => {
+    lists.push(data.host)
+  })
+}
 onMounted(() => {
   read_config()
 })
+
 </script>
 
 <style scoped>
