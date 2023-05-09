@@ -5,9 +5,9 @@ use std::thread;
 
 pub fn ssh_connect()-> Result<(), Box<dyn std::error::Error>> {
     let mut sess = Session::new()?;
-    sess.set_tcp_stream(TcpStream::connect("43.138.19.152:22")?);
+    sess.set_tcp_stream(TcpStream::connect("172.0.0.1:22")?);
     sess.handshake()?;
-    sess.userauth_password("ubuntu", "Gxt980926..")?;
+    sess.userauth_password("ubuntu", "123456")?;
     let mut channel = sess.channel_session()?;
     channel.request_pty("xterm", None, None)?;
     channel.shell()?;
