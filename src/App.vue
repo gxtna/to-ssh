@@ -13,7 +13,7 @@
         </el-header>
         <el-main>
           <div style="width: 100;height: 60%;border: solid 1px ;">
-            <el-button type="primary" round @click="openAddConnDialog">新增连接</el-button>
+            <el-button type="primary" round @click="getSSHClient">连接</el-button>
           </div>
         </el-main>
         <el-footer>
@@ -76,6 +76,9 @@ const openAddConnDialog = () => {
     password: '',
   })
   addConnDialog.value = true
+}
+async function getSSHClient(){
+  await invoke('ssh_client')
 }
 
 async function addConnection() {
