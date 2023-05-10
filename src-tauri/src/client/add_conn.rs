@@ -32,7 +32,7 @@ pub fn add_connection(conn: ConnInfo) -> bool {
 
 #[tauri::command]
 fn ssh_client(){
-    ssh_client::ssh::ssh_connect().unwrap();
+    ssh_client::ssh::ssh_connect().unwrap()
 }
 
 #[tauri::command]
@@ -44,7 +44,6 @@ fn read_config() -> Vec<ConnInfo> {
         Ok(file) => {
             let reader = BufReader::new(file);
             for line in reader.lines() {
-                println!("{:?}", line);
                 let data: ConnInfo = serde_json::from_str(&line.unwrap().to_string()).unwrap();
                 res.push(data);
             }

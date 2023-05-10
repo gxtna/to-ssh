@@ -1,11 +1,11 @@
-use ssh2::Session;
-use std::io::{stdin,stdout,Read,Write};
+use ssh2::{Channel, Session};
+use std::io::{stdin, stdout, Read, Write};
 use std::net::TcpStream;
 use std::thread;
 
-pub fn ssh_connect()-> Result<(), Box<dyn std::error::Error>> {
+pub fn ssh_connect() -> Result<(), Box<dyn std::error::Error>> {
     let mut sess = Session::new()?;
-    sess.set_tcp_stream(TcpStream::connect("172.0.0.1:22")?);
+    sess.set_tcp_stream(TcpStream::connect("127.0.0.1:22")?);
     sess.handshake()?;
     sess.userauth_password("ubuntu", "123456")?;
     let mut channel = sess.channel_session()?;
@@ -22,23 +22,75 @@ pub fn ssh_connect()-> Result<(), Box<dyn std::error::Error>> {
             ssh_stdin.write_all(&buf[..size]).unwrap();
         }
     });
-    let stdout_thread = thread::spawn(move || {
+    /* let stdout_thread = thread::spawn(move || {
         loop {
             let mut buf = [0; 1024];
             match channel.read(&mut buf) {
                 Ok(c) if c > 0 => {
                     print!("{}", std::str::from_utf8(&buf).unwrap());
+                     stdout().flush().unwrap();
+                }
+                Ok(0) => break,
+                _ => (),
+            };
+        }
+
+        channel.close().unwrap();
+        print!("Exit: {}", channel.exit_status().unwrap());
+    }); */
+    //let res = thread::spawn(move || {
+        let mut datas = Vec::new();
+        loop {
+            let mut buf = [0; 1024];
+        
+            let data = match channel.read(&mut buf) {
+                Ok(c) if c > 0 => {
+                    datas.push(std::str::from_utf8(&buf).unwrap().to_string());
+                    println!("{}",std::str::from_utf8(&buf).unwrap().to_string());
                     stdout().flush().unwrap();
                 }
                 Ok(0) => break,
                 _ => (),
-            }
+            };
         }
+        println!("{}",datas.len());
         channel.close().unwrap();
-        print!("Exit: {}", channel.exit_status().unwrap());
-    });
+        //datas
 
+    //});
+    //let x = res.join().unwrap();
+    //println!("{:?}",x.len());
+    /* for ele in x {
+        if ele.len()>0 {
+            println!("{:?}",ele);
+        }
+    } */
     stdin_thread.join().unwrap();
-    stdout_thread.join().unwrap();
+    //res.join().unwrap();
+    //stdout_thread.join().unwrap();
     Ok(())
+}
+
+fn read_data(mut channel: Channel) {
+    let res = thread::spawn(move || {
+        let mut datas = Vec::new();
+        loop {
+            let mut buf = [0; 1024];
+            let data = match channel.read(&mut buf) {
+                Ok(c) if c > 0 => {
+                    std::str::from_utf8(&buf).unwrap().to_string()
+                }
+                Ok(0) => break,
+                _ => "".to_owned(),
+            };
+            datas.push(data);
+        }
+        datas
+    });
+    let x = res.join().unwrap();
+    println!("{:?}",x.len());
+    for ele in x {
+        println!("{:?}",ele);
+    }
+
 }

@@ -65,7 +65,6 @@ let connInfo = reactive({
   password: '',
 })
 
-
 const lists: String[] = reactive([])
 
 const openAddConnDialog = () => {
@@ -78,7 +77,9 @@ const openAddConnDialog = () => {
   addConnDialog.value = true
 }
 async function getSSHClient(){
-  await invoke('ssh_client')
+  let res = await invoke('ssh_client')
+  console.log(res);
+  
 }
 
 async function addConnection() {
