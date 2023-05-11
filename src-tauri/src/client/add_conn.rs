@@ -31,8 +31,10 @@ pub fn add_connection(conn: ConnInfo) -> bool {
 }
 
 #[tauri::command]
-fn ssh_client(){
-    ssh_client::ssh::ssh_connect().unwrap()
+fn ssh_client()->String{
+    let x = ssh_client::ssh::ssh_connect().unwrap();
+    println!("{:?}", x);
+    x
 }
 
 #[tauri::command]
