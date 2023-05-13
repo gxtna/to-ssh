@@ -1,24 +1,31 @@
-use ssh2::{Channel, Session};
-use std::io::{stdin, stdout, Read, Write};
+use ssh2::Session;
+use ssh_rs::{ssh, ShellBrocker};
+use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::thread;
+use std::thread::sleep;
+use std::time::Duration;
+pub fn ssh_connect(comm: String) -> Result<String, Box<dyn std::error::Error>> {
+    let mut session = ssh::create_session()
+        .username("ubuntu")
+        .password("Gxt980926..")
+        .connect("43.138.19.152:22")
+        .unwrap()
+        .run_backend();
+    let mut shell = session.open_shell().unwrap();
+    let x =run_shell(&mut shell,comm);
+    shell.close().unwrap();
+    //session.close();
 
-pub fn ssh_connect() -> Result<String, Box<dyn std::error::Error>> {
-    let mut sess = Session::new()?;
-    sess.set_tcp_stream(TcpStream::connect("127.0.0.1:22")?);
-    sess.handshake()?;
-    sess.userauth_password("ubuntu", "123456")?;
-    let mut channel = sess.channel_session()?;
-    channel.request_pty("xterm", None, None)?;
-    //channel.shell()?;
-    //channel.handle_extended_data(ssh2::ExtendedData::Merge)?;
-    //sess.set_blocking(false);
-    channel.exec("ls").unwrap();
-    channel.send_eof().unwrap();
-    let mut s = String::new();
-    channel.read_to_string(&mut s).unwrap();
-    channel.wait_close().unwrap();
-    channel.exit_status().unwrap();
-    Ok(s)
+    Ok(x)
 }
-
+fn run_shell(shell: &mut ShellBrocker, comm: String) -> String {
+    let _vec = shell.read().unwrap();
+    let mut str = comm;
+    let enter = "\n".to_string();
+    str += &enter;
+    shell.write(str.as_bytes()).unwrap();
+    sleep(Duration::from_secs(2));
+    let vec = shell.read().unwrap();
+    String::from_utf8(vec).unwrap()
+}

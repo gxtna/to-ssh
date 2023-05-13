@@ -14,6 +14,7 @@
         <el-main>
           <div style="width: 100;height: 60%;border: solid 1px ;">
             <el-button type="primary" round @click="getSSHClient">连接</el-button>
+            <div id="terminal"></div>
           </div>
         </el-main>
         <el-footer>
@@ -57,6 +58,11 @@
 <script setup lang="ts">
 import { reactive, ref, onMounted, onBeforeMount } from 'vue'
 import { invoke } from "@tauri-apps/api/tauri";
+import {
+  Terminal
+} from "xterm";
+import "xterm/css/xterm.css";
+import "xterm/lib/xterm.js";
 const addConnDialog = ref(false)
 let connInfo = reactive({
   host: '',
@@ -76,11 +82,52 @@ const openAddConnDialog = () => {
   })
   addConnDialog.value = true
 }
-async function getSSHClient(){
-  let res = await invoke('ssh_client')
-  console.log(res);
-  
+const term = new Terminal({
+  rows: parseInt('40'), //行数
+  cols: parseInt('400'), // 不指定行数，自动回车后光标从下一行开始
+  //convertEol: true, //启用时，光标将设置为下一行的开头
+  //   scrollback: 50, //终端中的回滚量
+  disableStdin: false, //是否应禁用输入。
+  cursorStyle: "underline", //光标样式
+  cursorBlink: true, //光标闪烁
+  theme: {
+
+    foreground: "#7e9192", //字体
+    background: "#002833", //背景色
+    cursor: "help", //设置光标
+  }
+});
+
+async function getSSHClient(comm11: String) {
+  console.log("111");
+  let zx = comm11 ? "cd /home && ll" : comm11;
+
+  let res: any = await invoke('ssh_client', { comm: zx })
+  let x = document.getElementById("terminal");
+  if (x) {
+    term.open(x);
+    term.write(res);
+  }
+ 
 }
+term.onData(function (key) {
+  term.write(key)
+})
+term.onKey(function (key) {
+  console.log(key.domEvent.code == "Enter");
+
+  if (key.domEvent.code == "Enter") {
+    let res: any = invoke('ssh_client', { comm: "cd /usr/ && ll" })
+    console.log("111111");
+    console.log(res);
+    console.log("222");
+    let x = document.getElementById("terminal");
+    if (x) {
+      term.write(res);
+    }
+  }
+})
+
 
 async function addConnection() {
   console.log(connInfo);
