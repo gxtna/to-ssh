@@ -63,6 +63,7 @@ import {
 } from "xterm";
 import "xterm/css/xterm.css";
 import "xterm/lib/xterm.js";
+import { c } from '@tauri-apps/api/tauri-605fa63e';
 const addConnDialog = ref(false)
 let connInfo = reactive({
   host: '',
@@ -108,23 +109,29 @@ async function getSSHClient(comm11: String) {
     term.open(x);
     term.write(res);
   }
- 
-}
-term.onData(function (key) {
-  term.write(key)
-})
-term.onKey(function (key) {
-  console.log(key.domEvent.code == "Enter");
 
+}
+/* term.onData(function (key) {
+  term.write(key)
+}) */
+let cmm = ref("")
+term.onKey(function (key) {
+  cmm.value += key.key
+  term.write(key.key)
+  console.log(cmm.value );
+  
   if (key.domEvent.code == "Enter") {
-    let res: any = invoke('ssh_client', { comm: "cd /usr/ && ll" })
-    console.log("111111");
-    console.log(res);
-    console.log("222");
-    let x = document.getElementById("terminal");
-    if (x) {
-      term.write(res);
-    }
+    invoke('ssh_client', { comm: cmm.value }).then((data: any) => {
+      //console.log(data);
+      let x = document.getElementById("terminal");
+      
+      if (x) {
+        term.open(x);
+        term.write(data);
+      }
+      cmm.value = ""
+    })
+
   }
 })
 
